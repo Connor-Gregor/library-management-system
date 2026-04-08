@@ -4,7 +4,7 @@ Group project for COMPSCI 557.
 
 ## Tech Stack
 - Python
-- Flask
+- Flask (or Django, whichever people prefer)
 - MySQL
 - HTML/CSS/JavaScript
 
