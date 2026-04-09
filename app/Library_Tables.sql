@@ -10,9 +10,8 @@ create table book_collection(
     
 create table borrowing_history(
 	borrow_id int auto_increment primary key,
-    user_id int, book_id int, 
-    foreign key (user_id) references person(library_id), 
-    foreign key (book_id) references book_collection(book_id),
+    constraint user_id foreign key (user_id) references person(library_id), 
+    constraint book_id foreign key (book_id) references book_collection(book_id),
     borrow_date date, due_date date, return_date date);
     
 create table person(
