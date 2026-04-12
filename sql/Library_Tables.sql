@@ -11,7 +11,7 @@ create table person(
     address varchar(55),
     city varchar(55),
     zip_code int,
-    role varchar(55),
+    role varchar(55)
 );
 
 create table book_collection(
