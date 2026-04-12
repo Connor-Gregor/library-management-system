@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <p>Welcome, {{ session.username }}!</p>
+
+    <p>This is the admin dashboard.</p>
+
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>

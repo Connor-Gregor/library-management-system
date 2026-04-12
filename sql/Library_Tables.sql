@@ -10,7 +10,8 @@ create table person(
     last_name varchar(55),
     address varchar(55),
     city varchar(55),
-    zip_code int
+    zip_code int,
+    role varchar(55),
 );
 
 create table book_collection(
@@ -34,6 +35,13 @@ create table borrowing_history(
     constraint fk_user foreign key (user_id) references person(library_id),
     constraint fk_book foreign key (book_id) references book_collection(book_id)
 );
+
+-- testing login with an admin and regular user
+insert into person (username, pword, email, first_name, last_name, role)
+values ('admin1', 'adminpass', 'admin@test.com', 'Admin', 'User', 'admin');
+
+insert into person (username, pword, email, first_name, last_name, role)
+values ('user1', 'userpass', 'user@test.com', 'Regular', 'User', 'user');
 
 select * from person;
 select * from book_collection;
