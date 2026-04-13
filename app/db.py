@@ -26,3 +26,16 @@ def get_user_by_username(username):
     conn.close()
 
     return user
+
+def create_user(username, password, email, first_name, last_name, role='user'):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        INSERT INTO person (username, pword, email, first_name, last_name, role)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    
+    cursor.execute(query, (username, password, email, first_name, last_name, role))
+    conn.commit()
+    cursor.close()
+    conn.close()
