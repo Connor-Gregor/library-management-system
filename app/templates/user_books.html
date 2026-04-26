@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Books</title>
+</head>
+<body>
+    <h1>Search Books</h1>
+
+    <p>
+        <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+        |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </p>
+
+    <form method="POST">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search by title, author, or genre"
+            value="{{ search_term }}"
+        >
+        <button type="submit">Search</button>
+    </form>
+
+    <hr>
+
+    {% if books %}
+        <h2>Results</h2>
+
+        <table border="1" cellpadding="8">
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Genre</th>
+                <th>Available Copies</th>
+            </tr>
+
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author_first_name }} {{ book.author_last_name }}</td>
+                <td>{{ book.genre }}</td>
+                <td>
+                    {% if book.is_available %}
+                        Available
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% elif search_term %}
+        <p>No books found.</p>
+    {% endif %}
+</body>
+</html>

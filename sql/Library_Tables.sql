@@ -11,7 +11,7 @@ create table person(
     address varchar(55),
     city varchar(55),
     zip_code int,
-    role varchar(55),
+    role varchar(55)
 );
 
 create table book_collection(
@@ -42,6 +42,9 @@ values ('admin1', 'adminpass', 'admin@test.com', 'Admin', 'User', 'admin');
 
 insert into person (username, pword, email, first_name, last_name, role)
 values ('user1', 'userpass', 'user@test.com', 'Regular', 'User', 'user');
+
+-- testing searching for books
+
 
 select * from person;
 select * from book_collection;
