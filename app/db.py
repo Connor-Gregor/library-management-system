@@ -35,3 +35,16 @@ def search_books(search_term):
     query = "SELECT book_id, title, author_first_name, author_last_name, genre, is_available FROM book_collection WHERE title LIKE %s OR author_first_name LIKE %s OR author_last_name LIKE %s OR genre LIKE %s"
     search_pattern = f"%{search_term}%"
     return query_db(query, (search_pattern, search_pattern, search_pattern, search_pattern))
+
+def create_user(username, password, email, first_name, last_name, role='user'):
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = """
+        INSERT INTO person (username, pword, email, first_name, last_name, role)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """
+    
+    cursor.execute(query, (username, password, email, first_name, last_name, role))
+    conn.commit()
+    cursor.close()
+    conn.close()

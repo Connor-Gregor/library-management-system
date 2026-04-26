@@ -1,124 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Library Management System - Login</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-image: url('/static/images/Library_Background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-        .page-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+
+      .login-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 300px;
+        text-align: left;
+      }
+
+      .login-container h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+      }
+
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.6rem;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #0056b3;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+      }
+
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+
+      .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .flash-message {
             text-align: center;
-            width: 100%;
-        }
-
-        .page-title {
-            color: white;
-            margin: 0 0 20px 0;
-            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-        }
-
-        .login-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            width: 300px;
-            text-align: left;
-        }
-
-        .login-container h2 {
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 1.5rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.3rem;
+            margin-bottom: 1rem;
+            padding: 10px;
+            border-radius: 5px;
             font-size: 0.9rem;
         }
 
-        input {
-            width: 100%;
-            padding: 0.5rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        button {
-            width: 100%;
-            padding: 0.6rem;
-            background-color: #007BFF;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 1rem;
-            font-size: 0.85rem;
-        }
-
-        .footer a {
-            color: #007BFF;
-            text-decoration: none;
-        }
-
-        .error-message {
-            color: red;
-            text-align: center;
-            margin-bottom: 1rem;
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
         }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="page-wrapper">
-        <h1 class="page-title">Library Management System</h1>
+      <h1 class="page-title">Library Management System</h1>
 
-        <div class="login-container">
-            <h2>Login</h2>
+      <div class="login-container">
+        <h2>Login</h2>
 
-            {% if error %}
-                <p class="error-message">{{ error }}</p>
+        {% with messages = get_flashed_messages(with_categories=true) %} 
+            {% if messages %} 
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %} 
             {% endif %}
+        {% endwith %}
 
-            <form method="POST" action="{{ url_for('login') }}">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
 
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+        <form method="POST" action="{{ url_for('login') }}">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" required />
 
-                <button type="submit">Log In</button>
-            </form>
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
 
-            <div class="footer">
-                <p>Don't have an account? <a href="/register">Register</a></p>
-            </div>
+          <button type="submit">Log In</button>
+        </form>
+
+        <div class="footer">
+          <p>Don't have an account? <a href="/register">Register</a></p>
         </div>
+      </div>
     </div>
-</body>
+  </body>
 </html>

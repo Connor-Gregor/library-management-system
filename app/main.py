@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, session
-from db import get_user_by_username, search_books
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from db import get_user_by_username, create_user, search_books
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -36,6 +36,29 @@ def login():
 
     return render_template("login.html", error=error)
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    error = None
+
+    if request.method == "POST":
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        email = request.form.get("email")
+        username = request.form.get("username")
+        password = request.form.get("password")
+        
+        existing_user = get_user_by_username(username)
+        
+        if existing_user:
+            error = "That username is already taken. Please choose another."
+        elif len(password) < 5:
+            error = "Password must be at least 5 characters long."
+        else:
+            create_user(username, password, email, first_name, last_name)
+            flash("Registration successful!", "success")
+            return redirect(url_for("login"))
+
+    return render_template("register.html", error=error)
 
 @app.route("/admin")
 def admin_dashboard():
