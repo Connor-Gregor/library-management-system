@@ -43,6 +43,9 @@ values ('admin1', 'adminpass', 'admin@test.com', 'Admin', 'User', 'admin');
 insert into person (username, pword, email, first_name, last_name, role)
 values ('user1', 'userpass', 'user@test.com', 'Regular', 'User', 'user');
 
+-- testing searching for books
+
+
 select * from person;
 select * from book_collection;
 select * from borrowing_history;

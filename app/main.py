@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import get_user_by_username, create_user
+from db import get_user_by_username, create_user, search_books
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -84,6 +84,20 @@ def logout():
     session.clear()
     return redirect(url_for("login"))
 
+
+@app.route("/user/books", methods=["GET", "POST"])
+def user_books():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    books = []
+    search_term = ""
+
+    if request.method == "POST":
+        search_term = request.form.get("search", "")
+        books = search_books(search_term)
+
+    return render_template("user_books.html", books=books, search_term=search_term)
 
 if __name__ == "__main__":
     app.run(debug=True)
