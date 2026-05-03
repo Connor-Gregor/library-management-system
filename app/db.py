@@ -22,7 +22,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="PUT YOUR MYSQL WORKBENCH PASSWORD HERE", #password for mysql database, change it to your own passowrd
+        password="admin", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -48,3 +48,22 @@ def create_user(username, password, email, first_name, last_name, role='user'):
     conn.commit()
     cursor.close()
     conn.close()
+
+#fix this
+def get_book(title, author_first_name, author_last_name):
+    query = """
+        SELECT book_id, title, author_first_name, author_last_name
+        FROM book_collection
+        WHERE title = %s
+          AND author_first_name = %s
+          AND author_last_name = %s
+    """
+    return query_db(query, (title, author_first_name, author_last_name), fetchone=True)
+
+def create_book(title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available):
+    query = """
+        INSERT INTO book_collection 
+        (title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """
+    return query_db(query, (title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available))
