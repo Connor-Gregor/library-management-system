@@ -1,7 +1,7 @@
 from enum import nonmember
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import get_user_by_username, create_user, search_books, get_book, create_book
+from db import get_user_by_username, create_user, search_books, get_book, create_book, borrow_book
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -110,30 +110,47 @@ def admin_add_book():
         return redirect(url_for("user_dashboard"))
 
     error = None
-
     if request.method == "POST":
         title = request.form.get("title")
         a_first_name = request.form.get("author_first_name")
         a_last_name = request.form.get("author_last_name")
+        genre = request.form.get("genre")
+        
         try:
             p_year = int(request.form.get("publish_year"))
             p_month = int(request.form.get("publish_month"))
+            copies_available = int(request.form.get("copies_available"))
+            
+            if copies_available < 0:
+                error = "Copies cannot be negative."
+                return render_template("add_book.html", error=error)
         except ValueError:
-            error = "Publish year and month must be numbers."
+            error = "Publish year, month, and copies must be numbers."
             return render_template("add_book.html", error=error)
-        genre = request.form.get("genre")
-        is_available = request.form.get("is_available")
 
         existing_book = get_book(title, a_first_name, a_last_name)
-
         if existing_book:
             error = "That book has already been added to the library."
         else:
-            create_book(title, a_first_name, a_last_name, p_year, p_month, genre, is_available)
+            create_book(title, a_first_name, a_last_name, p_year, p_month, genre, copies_available)
             flash("Addition successful!", "success")
             return redirect(url_for("admin_dashboard"))
 
     return render_template("add_book.html", error=error)
+
+@app.route("/borrow/<int:book_id>", methods=["POST"])
+def borrow(book_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    success, message = borrow_book(user_id, book_id)
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
+
+    return redirect(url_for("user_books"))
 
 if __name__ == "__main__":
     app.run(debug=True)

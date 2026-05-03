@@ -1,167 +1,197 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Library Management System - Search Books</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-image: url('/static/images/Library_Background.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      min-height: 100vh;
-      margin: 0;
-      padding: 40px 0;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Library Management System - Search Books</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 0;
+      }
 
-    .page-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      width: 100%;
-    }
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
 
-    .page-title {
-      color: white;
-      margin: 0 0 20px 0;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    }
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
 
-    .content-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      width: 700px;
-      max-width: 90%;
-      text-align: left;
-    }
+      .content-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 700px;
+        max-width: 90%;
+        text-align: left;
+      }
 
-    .content-container h2 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.5rem;
-    }
+      .content-container h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
 
-    .nav-links {
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
+      .nav-links {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
 
-    .nav-links a {
-      color: #007bff;
-      text-decoration: none;
-      margin: 0 8px;
-    }
+      .nav-links a {
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 8px;
+      }
 
-    form {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 1.5rem;
-    }
+      form {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+      }
 
-    input {
-      flex: 1;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
+      input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
 
-    button {
-      padding: 0.6rem 1rem;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
+      button {
+        padding: 0.6rem 1rem;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
 
-    th, td {
-      border: 1px solid #ccc;
-      padding: 0.6rem;
-      text-align: left;
-    }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.6rem;
+        text-align: left;
+      }
 
-    th {
-      background-color: #f2f2f2;
-    }
+      th {
+        background-color: #f2f2f2;
+      }
 
-    .message {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 0.95rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="page-wrapper">
-    <h1 class="page-title">Library Management System</h1>
+      .message {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <h1 class="page-title">Library Management System</h1>
 
-    <div class="content-container">
-      <h2>Search Books</h2>
+      <div class="content-container">
+        <h2>Search Books</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="message"
+          style="padding: 10px; margin-bottom: 10px; border-radius: 5px; 
+                     {% if category == 'success' %}background-color: #d4edda; color: #155724;{% else %}background-color: #f8d7da; color: #721c24;{% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
 
-      <div class="nav-links">
-        <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
-        |
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <div class="nav-links">
+          <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a>
+          |
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <form method="POST">
+          <input
+            type="text"
+            name="search"
+            placeholder="Search by title, author, or genre"
+            value="{{ search_term }}"
+            required
+          />
+          <button type="submit">Search</button>
+        </form>
+
+        {% if books %}
+        <h3>Results</h3>
+
+        <table>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Genre</th>
+            <th>Status</th>
+          </tr>
+
+          {% for book in books %}
+          <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author_first_name }} {{ book.author_last_name }}</td>
+            <td>{{ book.genre }}</td>
+
+            <td>
+              {% if book.copies_available > 0 %}
+              <span style="color: green; font-weight: bold"
+                >Available ({{ book.copies_available }} left)</span
+              >
+              <form
+                action="{{ url_for('borrow', book_id=book.book_id) }}"
+                method="POST"
+                style="display: inline; margin-left: 10px"
+              >
+                <button
+                  type="submit"
+                  style="
+                    padding: 0.3rem 0.6rem;
+                    font-size: 0.8rem;
+                    background-color: #28a745;
+                  "
+                >
+                  Borrow
+                </button>
+              </form>
+              {% else %}
+              <span style="color: red; font-weight: bold">Out of Stock</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% elif search_term %}
+        <p class="message">No books found.</p>
+        {% endif %}
       </div>
-
-      <form method="POST">
-        <input
-          type="text"
-          name="search"
-          placeholder="Search by title, author, or genre"
-          value="{{ search_term }}"
-          required
-        />
-        <button type="submit">Search</button>
-      </form>
-
-      {% if books %}
-      <h3>Results</h3>
-
-      <table>
-        <tr>
-          <th>Title</th>
-          <th>Author</th>
-          <th>Genre</th>
-          <th>Status</th>
-        </tr>
-
-        {% for book in books %}
-        <tr>
-          <td>{{ book.title }}</td>
-          <td>{{ book.author_first_name }} {{ book.author_last_name }}</td>
-          <td>{{ book.genre }}</td>
-          <td>
-            {% if book.is_available %}
-              Available
-            {% else %}
-              Not Available
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </table>
-      {% elif search_term %}
-      <p class="message">No books found.</p>
-      {% endif %}
     </div>
-  </div>
-</body>
+  </body>
 </html>

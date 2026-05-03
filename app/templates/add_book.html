@@ -1,166 +1,184 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Library Management System - Add Book</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-image: url('/static/images/Library_Background.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      min-height: 100vh;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Library Management System - Add Book</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
 
-    .page-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      width: 100%;
-    }
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+      }
 
-    .page-title {
-      color: white;
-      margin: 0 0 20px 0;
-      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    }
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
 
-    .form-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      width: 350px;
-      text-align: left;
-    }
+      .form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 350px;
+        text-align: left;
+      }
 
-    .form-container h2 {
-      text-align: center;
-      margin-top: 0;
-      margin-bottom: 1.5rem;
-    }
+      .form-container h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
 
-    label {
-      display: block;
-      margin-bottom: 0.3rem;
-      font-size: 0.9rem;
-    }
+      label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+      }
 
-    input {
-      width: 100%;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
 
-    .radio-row {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 1rem;
-    }
+      .radio-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 1rem;
+      }
 
-    .radio-row label {
-      display: inline;
-      margin: 0;
-    }
+      .radio-row label {
+        display: inline;
+        margin: 0;
+      }
 
-    .radio-row input {
-      width: auto;
-      margin: 0 5px 0 0;
-    }
+      .radio-row input {
+        width: auto;
+        margin: 0 5px 0 0;
+      }
 
-    button {
-      width: 100%;
-      padding: 0.6rem;
-      background-color: #007bff;
-      border: none;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1rem;
-    }
+      button {
+        width: 100%;
+        padding: 0.6rem;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+      button:hover {
+        background-color: #0056b3;
+      }
 
-    .footer {
-      text-align: center;
-      margin-top: 1rem;
-      font-size: 0.85rem;
-    }
+      .footer {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+      }
 
-    .footer a {
-      color: #007bff;
-      text-decoration: none;
-    }
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
 
-    .error-message {
-      color: red;
-      text-align: center;
-      margin-bottom: 1rem;
-      font-size: 0.9rem;
-    }
-  </style>
-</head>
-<body>
-  <div class="page-wrapper">
-    <h1 class="page-title">Library Management System</h1>
+      .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <h1 class="page-title">Library Management System</h1>
 
-    <div class="form-container">
-      <h2>Add New Book</h2>
+      <div class="form-container">
+        <h2>Add New Book</h2>
 
-      {% if error %}
-      <p class="error-message">{{ error }}</p>
-      {% endif %}
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
 
-      <form method="POST" action="{{ url_for('admin_add_book') }}">
-        <label for="title">Title</label>
-        <input type="text" id="title" name="title" required />
+        <form method="POST" action="{{ url_for('admin_add_book') }}">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" required />
 
-        <label for="author_first_name">Author First Name</label>
-        <input type="text" id="author_first_name" name="author_first_name" required />
+          <label for="author_first_name">Author First Name</label>
+          <input
+            type="text"
+            id="author_first_name"
+            name="author_first_name"
+            required
+          />
 
-        <label for="author_last_name">Author Last Name</label>
-        <input type="text" id="author_last_name" name="author_last_name" required />
+          <label for="author_last_name">Author Last Name</label>
+          <input
+            type="text"
+            id="author_last_name"
+            name="author_last_name"
+            required
+          />
 
-        <label for="publish_year">Publish Year</label>
-        <input type="number" id="publish_year" name="publish_year" required />
+          <label for="publish_year">Publish Year</label>
+          <input type="number" id="publish_year" name="publish_year" required />
 
-        <label for="publish_month">Publish Month</label>
-        <input type="number" id="publish_month" name="publish_month" min="1" max="12" required />
+          <label for="publish_month">Publish Month</label>
+          <input
+            type="number"
+            id="publish_month"
+            name="publish_month"
+            min="1"
+            max="12"
+            required
+          />
 
-        <label for="genre">Genre</label>
-        <input type="text" id="genre" name="genre" required />
+          <label for="genre">Genre</label>
+          <input type="text" id="genre" name="genre" required />
 
-        <label>Available?</label>
-        <div class="radio-row">
-          <div>
-            <input type="radio" id="available_yes" name="is_available" value="1" checked />
-            <label for="available_yes">Yes</label>
-          </div>
-          <div>
-            <input type="radio" id="available_no" name="is_available" value="0" />
-            <label for="available_no">No</label>
-          </div>
+          <label for="copies_available">Number of Copies</label>
+          <input
+            type="number"
+            id="copies_available"
+            name="copies_available"
+            min="1"
+            required
+          />
+
+          <button type="submit">Add Book</button>
+        </form>
+
+        <div class="footer">
+          <p>
+            <a href="{{ url_for('admin_dashboard') }}"
+              >Back to Admin Dashboard</a
+            >
+          </p>
         </div>
-
-        <button type="submit">Add Book</button>
-      </form>
-
-      <div class="footer">
-        <p><a href="{{ url_for('admin_dashboard') }}">Back to Admin Dashboard</a></p>
       </div>
     </div>
-  </div>
-</body>
+  </body>
 </html>

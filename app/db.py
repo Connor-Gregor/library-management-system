@@ -1,4 +1,5 @@
 import mysql.connector
+from datetime import date, timedelta
 
 # Helper function for easily using queries
 def query_db(query, params=None, fetchone=False):
@@ -32,7 +33,7 @@ def get_user_by_username(username):
     return query_db(query, (username,), fetchone=True)
 
 def search_books(search_term):
-    query = "SELECT book_id, title, author_first_name, author_last_name, genre, is_available FROM book_collection WHERE title LIKE %s OR author_first_name LIKE %s OR author_last_name LIKE %s OR genre LIKE %s"
+    query = "SELECT book_id, title, author_first_name, author_last_name, genre, copies_available FROM book_collection WHERE title LIKE %s OR author_first_name LIKE %s OR author_last_name LIKE %s OR genre LIKE %s"
     search_pattern = f"%{search_term}%"
     return query_db(query, (search_pattern, search_pattern, search_pattern, search_pattern))
 
@@ -60,10 +61,60 @@ def get_book(title, author_first_name, author_last_name):
     """
     return query_db(query, (title, author_first_name, author_last_name), fetchone=True)
 
-def create_book(title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available):
+def create_book(title, author_first_name, author_last_name, publish_year, publish_month, genre, copies_available):
     query = """
         INSERT INTO book_collection 
-        (title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available)
+        (title, author_first_name, author_last_name, publish_year, publish_month, genre, copies_available)
         VALUES (%s, %s, %s, %s, %s, %s, %s)
     """
-    return query_db(query, (title, author_first_name, author_last_name, publish_year, publish_month, genre, is_available))
+    return query_db(query, (title, author_first_name, author_last_name, publish_year, publish_month, genre, copies_available))
+
+def borrow_book(user_id, book_id):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute("SELECT copies_available FROM book_collection WHERE book_id = %s", (book_id,))
+        book = cursor.fetchone()
+        if not book or book['copies_available'] < 1:
+            return False, "Sorry, there are no copies of this book left."
+
+        cursor.execute("UPDATE book_collection SET copies_available = copies_available - 1 WHERE book_id = %s", (book_id,))
+        borrow_date = date.today()
+        due_date = borrow_date + timedelta(days=30)
+        insert_query = """
+            INSERT INTO borrowing_history (user_id, book_id, borrow_date, due_date)
+            VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (user_id, book_id, borrow_date, due_date))
+        conn.commit()
+        return True, "Book borrowed successfully! It is due in 30 days."
+
+    except Exception as e:
+        conn.rollback()
+        return False, f"An error occurred: {str(e)}"
+    finally:
+        cursor.close()
+        conn.close()
+        
+def return_book(user_id, book_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        update_history = """
+            UPDATE borrowing_history 
+            SET return_date = %s 
+            WHERE user_id = %s AND book_id = %s AND return_date IS NULL
+        """
+        cursor.execute(update_history, (date.today(), user_id, book_id))
+        update_book = "UPDATE book_collection SET copies_available = copies_available + 1 WHERE book_id = %s"
+        cursor.execute(update_book, (book_id,))
+        conn.commit()
+        return True, "Book returned successfully! Thank you."
+
+    except Exception as e:
+        conn.rollback()
+        return False, f"An error occurred: {str(e)}"
+    finally:
+        cursor.close()
+        conn.close()
