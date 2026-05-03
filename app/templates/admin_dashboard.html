@@ -8,6 +8,7 @@
     <p>Welcome, {{ session.username }}!</p>
 
     <p>This is the admin dashboard.</p>
+    <a href="{{ url_for('admin_add_book') }}">Add a new book to the library</a>
 
     <a href="{{ url_for('logout') }}">Logout</a>
 </body>
