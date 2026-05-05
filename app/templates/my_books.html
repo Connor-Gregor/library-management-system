@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Library Management System - My Books</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 0;
+      }
+
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+
+      .content-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 800px;
+        max-width: 90%;
+        text-align: left;
+      }
+
+      .content-container h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
+
+      .nav-links {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .nav-links a {
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.8rem;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+      }
+
+      .btn-disabled {
+        padding: 0.4rem 0.8rem;
+        background-color: #6c757d;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: not-allowed;
+        font-size: 0.9rem;
+      }
+
+      .message {
+        text-align: center;
+        margin-top: 2rem;
+        font-size: 1rem;
+        color: #555;
+      }
+      .btn-return {
+        padding: 0.4rem 0.8rem;
+        background-color: #dc3545;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .btn-return:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <h1 class="page-title">Library Management System</h1>
+
+      <div class="content-container">
+        <h2>My Borrowed Books</h2>
+
+        <div class="nav-links">
+          <a href="{{ url_for('user_dashboard') }}">Back to Dashboard</a> |
+          <a href="{{ url_for('user_books') }}">Search Books</a> |
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="message"
+          style="padding: 10px; margin-bottom: 10px; border-radius: 5px; {% if category == 'success' %}background-color: #d4edda; color: #155724;{% else %}background-color: #f8d7da; color: #721c24;{% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
+
+        <h3>Currently Checked Out</h3>
+        {% if active_books %}
+        <table>
+          <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Borrow Date</th>
+            <th>Due Date</th>
+            <th>Action</th>
+          </tr>
+          {% for book in active_books %}
+          <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author_first_name }} {{ book.author_last_name }}</td>
+            <td>{{ book.borrow_date }}</td>
+            <td>{{ book.due_date }}</td>
+            <td>
+              <form
+                action="{{ url_for('return_book_route', book_id=book.book_id) }}"
+                method="POST"
+                style="margin: 0"
+                onsubmit="
+                  return confirm('Are you sure you want to return this book?');
+                "
+              >
+                <button type="submit" class="btn-return">Return Book</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <p class="message" style="margin-bottom: 2rem">
+          You do not currently have any books checked out.
+        </p>
+        {% endif %}
+
+        <hr style="margin: 2rem 0; border: 1px solid #eee" />
+
+        <h3>Complete Rental History</h3>
+        {% if history_books %}
+        <table>
+          <tr>
+            <th>Title</th>
+            <th>Borrow Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+          </tr>
+          {% for book in history_books %}
+          <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.borrow_date }}</td>
+            <td>{{ book.due_date }}</td>
+            <td>
+              {% if book.return_date %} {{ book.return_date }} {% else %} - {%
+              endif %}
+            </td>
+            <td>
+              {% if book.return_date %}
+              <span style="color: gray">Returned</span>
+              {% else %}
+              <span style="color: #28a745; font-weight: bold">Active</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <p class="message">You have no rental history.</p>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>

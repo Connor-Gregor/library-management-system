@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Library Borrowing History</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        padding: 40px 0;
+      }
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+      .content-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 900px;
+        max-width: 95%;
+        text-align: left;
+      }
+      h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
+      .nav-links {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.9rem;
+      }
+      .nav-links a {
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.8rem;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .status-active {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .status-returned {
+        color: gray;
+      }
+      .message {
+        text-align: center;
+        margin-top: 2rem;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <h1 class="page-title">Admin Control Panel</h1>
+
+      <div class="content-container">
+        <h2>Library Borrowing History</h2>
+
+        <div class="nav-links">
+          <a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
+          |
+          <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        {% if records %}
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Book Title</th>
+            <th>Borrow Date</th>
+            <th>Due Date</th>
+            <th>Return Date</th>
+            <th>Status</th>
+          </tr>
+          {% for record in records %}
+          <tr>
+            <td>{{ record.borrow_id }}</td>
+            <td><strong>{{ record.username }}</strong></td>
+            <td>{{ record.title }}</td>
+            <td>{{ record.borrow_date }}</td>
+            <td>{{ record.due_date }}</td>
+            <td>
+              {% if record.return_date %} {{ record.return_date }} {% else %} -
+              {% endif %}
+            </td>
+            <td>
+              {% if record.return_date %}
+              <span class="status-returned">Returned</span>
+              {% else %}
+              <span class="status-active">Active</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        {% else %}
+        <p class="message">No borrowing records found in the database.</p>
+        {% endif %}
+      </div>
+    </div>
+  </body>
+</html>

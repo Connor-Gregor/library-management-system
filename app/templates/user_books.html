@@ -107,6 +107,19 @@
         margin-top: 1rem;
         font-size: 0.95rem;
       }
+      .btn-borrow {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+        background-color: #28a745;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .btn-borrow:hover {
+        background-color: #218838;
+      }
     </style>
   </head>
   <body>
@@ -169,17 +182,11 @@
                 action="{{ url_for('borrow', book_id=book.book_id) }}"
                 method="POST"
                 style="display: inline; margin-left: 10px"
+                onsubmit="
+                  return confirm('Are you sure you want to borrow this book?');
+                "
               >
-                <button
-                  type="submit"
-                  style="
-                    padding: 0.3rem 0.6rem;
-                    font-size: 0.8rem;
-                    background-color: #28a745;
-                  "
-                >
-                  Borrow
-                </button>
+                <button type="submit" class="btn-borrow">Borrow</button>
               </form>
               {% else %}
               <span style="color: red; font-weight: bold">Out of Stock</span>

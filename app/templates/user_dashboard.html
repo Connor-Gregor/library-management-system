@@ -1,16 +1,68 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>User Dashboard</title>
-</head>
-<body>
-    <h1>User Dashboard</h1>
-    <p>Welcome, {{ session.username }}!</p>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .dashboard-container {
+        background: white;
+        padding: 3rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        text-align: center;
+      }
+      h1 {
+        margin-top: 0;
+      }
+      .menu-btn {
+        display: block;
+        width: 100%;
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        box-sizing: border-box;
+      }
+      .menu-btn:hover {
+        background-color: #0056b3;
+      }
+      .logout-btn {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.6rem 1.2rem;
+        background-color: #dc3545;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 1rem;
+      }
+      .logout-btn:hover {
+        background-color: #c82333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <h1>Welcome, {{ session.username }}!</h1>
 
-    <p>This is the user dashboard.</p>
-
-    <a href="{{ url_for('user_books') }}">Search Books</a>
-
-    <a href="{{ url_for('logout') }}">Logout</a>
-</body>
+      <a href="{{ url_for('user_books') }}" class="menu-btn">Search Books</a>
+      <a href="{{ url_for('my_books') }}" class="menu-btn">My Borrowed Books</a>
+      <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+  </body>
 </html>

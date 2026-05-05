@@ -1,7 +1,7 @@
 from enum import nonmember
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import get_user_by_username, create_user, search_books, get_book, create_book, borrow_book
+from db import get_user_by_username, create_user, search_books, get_book, create_book, borrow_book, get_my_borrowed_books, return_book, get_user_borrowing_history, get_all_borrowing_records
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -151,6 +151,40 @@ def borrow(book_id):
         flash(message, "error")
 
     return redirect(url_for("user_books"))
+
+@app.route("/my_books")
+def my_books():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    user_id = session["user_id"]
+    active_books = get_my_borrowed_books(user_id)
+    history_books = get_user_borrowing_history(user_id)
+    return render_template("my_books.html", active_books=active_books, history_books=history_books)
+
+
+@app.route("/return/<int:book_id>", methods=["POST"])
+def return_book_route(book_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user_id = session["user_id"]
+    success, message = return_book(user_id, book_id)
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
+
+    return redirect(url_for("my_books"))
+
+@app.route("/admin/history")
+def admin_history():
+    if session.get("role") != "admin":
+        flash("Unauthorized access. Admins only.", "error")
+        return redirect(url_for("login"))
+
+    records = get_all_borrowing_records()
+    return render_template("admin_history.html", records=records)
 
 if __name__ == "__main__":
     app.run(debug=True)

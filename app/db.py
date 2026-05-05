@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="PUT YOUR MYSQL WORKBENCH PASSWORD HERE", #password for mysql database, change it to your own passowrd
+        password="YOUR MYSQL PASSWORD", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -74,8 +74,15 @@ def borrow_book(user_id, book_id):
     cursor = conn.cursor(dictionary=True)
 
     try:
+        cursor.execute("SELECT * FROM borrowing_history WHERE user_id = %s AND book_id = %s AND return_date IS NULL", (user_id, book_id))
+        already_borrowed = cursor.fetchone()
+        
+        if already_borrowed:
+            return False, "You already have a copy of this book checked out!"
+
         cursor.execute("SELECT copies_available FROM book_collection WHERE book_id = %s", (book_id,))
         book = cursor.fetchone()
+        
         if not book or book['copies_available'] < 1:
             return False, "Sorry, there are no copies of this book left."
 
@@ -118,3 +125,32 @@ def return_book(user_id, book_id):
     finally:
         cursor.close()
         conn.close()
+        
+def get_my_borrowed_books(user_id):
+    query = """
+        SELECT b.book_id, b.title, b.author_first_name, b.author_last_name, bh.borrow_date, bh.due_date
+        FROM book_collection b
+        JOIN borrowing_history bh ON b.book_id = bh.book_id
+        WHERE bh.user_id = %s AND bh.return_date IS NULL
+    """
+    return query_db(query, (user_id,))
+
+def get_user_borrowing_history(user_id):
+    query = """
+        SELECT b.title, b.author_first_name, b.author_last_name, bh.borrow_date, bh.due_date, bh.return_date
+        FROM book_collection b
+        JOIN borrowing_history bh ON b.book_id = bh.book_id
+        WHERE bh.user_id = %s
+        ORDER BY bh.borrow_date DESC
+    """
+    return query_db(query, (user_id,))
+
+def get_all_borrowing_records():
+    query = """
+        SELECT h.borrow_id, p.username, b.title, h.borrow_date, h.due_date, h.return_date
+        FROM borrowing_history h
+        JOIN person p ON h.user_id = p.library_id
+        JOIN book_collection b ON h.book_id = b.book_id
+        ORDER BY h.borrow_date DESC
+    """
+    return query_db(query)
