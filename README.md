@@ -4,9 +4,9 @@ Group project for COMPSCI 557.
 
 ## Tech Stack
 - Python
-- Flask (or Django, whichever people prefer)
+- Flask 
 - MySQL
-- HTML/CSS/JavaScript
+- HTML/CSS/
 
 ## Team Members
 - Aaditya Tiwari
