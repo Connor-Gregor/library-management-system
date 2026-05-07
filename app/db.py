@@ -154,3 +154,15 @@ def get_all_borrowing_records():
         ORDER BY h.borrow_date DESC
     """
     return query_db(query)
+
+def get_all_books():
+    query = """
+        SELECT book_id, title, author_first_name, author_last_name, publish_year
+        FROM book_collection
+        ORDER BY title
+    """
+    return query_db(query)
+
+def delete_book(book_id):
+    query = "DELETE FROM book_collection WHERE book_id = %s"
+    return query_db(query, (book_id,))
