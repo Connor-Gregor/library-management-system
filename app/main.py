@@ -1,7 +1,9 @@
 from enum import nonmember
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import get_user_by_username, create_user, search_books, get_book, create_book, borrow_book, get_my_borrowed_books, return_book, get_user_borrowing_history, get_all_borrowing_records
+from db import (get_user_by_username, create_user, search_books, get_book, create_book, borrow_book,
+                get_my_borrowed_books, return_book, get_user_borrowing_history, get_all_borrowing_records,
+                get_all_books, delete_book)
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -185,6 +187,31 @@ def admin_history():
 
     records = get_all_borrowing_records()
     return render_template("admin_history.html", records=records)
+
+
+@app.route("/admin/view_books")
+def admin_view_books():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("role") != "admin":
+        return redirect(url_for("user_dashboard"))
+
+    books = get_all_books()
+    return render_template("admin_view_all_books.html", books=books)
+
+@app.route("/admin/delete_book/<int:book_id>", methods=["POST"])
+def admin_delete_book(book_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if session.get("role") != "admin":
+        return redirect(url_for("user_dashboard"))
+
+    delete_book(book_id)
+    flash("Book deleted successfully.", "success")
+
+    return redirect(url_for("admin_view_books"))
 
 if __name__ == "__main__":
     app.run(debug=True)
