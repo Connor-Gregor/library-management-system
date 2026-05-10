@@ -50,7 +50,6 @@ def create_user(username, password, email, first_name, last_name, role='user'):
     cursor.close()
     conn.close()
 
-#fix this
 def get_book(title, author_first_name, author_last_name):
     query = """
         SELECT book_id, title, author_first_name, author_last_name

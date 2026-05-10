@@ -49,3 +49,9 @@ values ('user1', 'userpass', 'user@test.com', 'Regular', 'User', 'user');
 select * from person;
 select * from book_collection;
 select * from borrowing_history;
+
+ALTER TABLE book_collection
+ADD copies_available INT DEFAULT 1;
+
+CREATE INDEX idx_book_title
+ON book_collection(title);
