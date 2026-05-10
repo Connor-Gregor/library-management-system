@@ -26,6 +26,8 @@ def login():
 
         if user is None:
             error = "Invalid username or password."
+        elif not username or not password:
+            error = "Please fill out all fields."
         elif user["pword"] != password:
             error = "Invalid username or password."
         else:
@@ -52,8 +54,9 @@ def register():
         password = request.form.get("password")
         
         existing_user = get_user_by_username(username)
-        
-        if existing_user:
+        if "@" not in email:
+            error = "Invalid email address."
+        elif existing_user:
             error = "That username is already taken. Please choose another."
         elif len(password) < 5:
             error = "Password must be at least 5 characters long."
@@ -112,25 +115,39 @@ def admin_add_book():
         return redirect(url_for("user_dashboard"))
 
     error = None
+
     if request.method == "POST":
-        title = request.form.get("title")
-        a_first_name = request.form.get("author_first_name")
-        a_last_name = request.form.get("author_last_name")
-        genre = request.form.get("genre")
-        
+        title = request.form.get("title", "").strip()
+        a_first_name = request.form.get("author_first_name", "").strip()
+        a_last_name = request.form.get("author_last_name", "").strip()
+        genre = request.form.get("genre", "").strip()
+
+        if not title or not a_first_name or not a_last_name or not genre:
+            error = "Title, author name, and genre are required."
+            return render_template("add_book.html", error=error)
+
         try:
             p_year = int(request.form.get("publish_year"))
             p_month = int(request.form.get("publish_month"))
             copies_available = int(request.form.get("copies_available"))
-            
-            if copies_available < 0:
-                error = "Copies cannot be negative."
-                return render_template("add_book.html", error=error)
         except ValueError:
             error = "Publish year, month, and copies must be numbers."
             return render_template("add_book.html", error=error)
 
+        if p_month < 1 or p_month > 12:
+            error = "Month must be between 1 and 12."
+            return render_template("add_book.html", error=error)
+
+        if p_year > 2026:
+            error = "Invalid publish year."
+            return render_template("add_book.html", error=error)
+
+        if copies_available < 0:
+            error = "Copies cannot be negative."
+            return render_template("add_book.html", error=error)
+
         existing_book = get_book(title, a_first_name, a_last_name)
+
         if existing_book:
             error = "That book has already been added to the library."
         else:
