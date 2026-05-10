@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Aadi02@noidayt", #password for mysql database, change it to your own passowrd
+        password="MYSQL PASSWORD", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
