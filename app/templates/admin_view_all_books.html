@@ -107,7 +107,7 @@
       }
 
       .delete-button:hover {
-            background-color: #b02a37;
+        background-color: #b02a37;
       }
     </style>
   </head>
@@ -118,15 +118,20 @@
 
       <div class="content-container">
         <h2>All Library Books</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div
+          class="message"
+          style="padding: 10px; margin-bottom: 15px; border-radius: 5px; {% if category == 'success' %}background-color: #d4edda; color: #155724;{% else %}background-color: #f8d7da; color: #721c24;{% endif %}"
+        >
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
 
         <div class="nav-links">
-          <a href="{{ url_for('admin_dashboard') }}">
-            Back to Dashboard
-          </a>
+          <a href="{{ url_for('admin_dashboard') }}"> Back to Dashboard </a>
           |
-          <a href="{{ url_for('logout') }}">
-            Logout
-          </a>
+          <a href="{{ url_for('logout') }}"> Logout </a>
         </div>
 
         {% if books %}
@@ -141,32 +146,41 @@
           {% for book in books %}
           <tr>
             <td>{{ book.title }}</td>
-            <td>
-              {{ book.author_first_name }}
-              {{ book.author_last_name }}
-            </td>
+            <td>{{ book.author_first_name }} {{ book.author_last_name }}</td>
             <td>{{ book.publish_year }}</td>
 
             <td>
-              <button class="edit-button">
-                Edit
-              </button>
+              <button class="edit-button">Edit</button>
+
+              {% if book.has_history %}
               <form
                 action="{{ url_for('admin_delete_book', book_id=book.book_id) }}"
                 method="POST"
-                style="display:inline;"
+                style="display: inline"
               >
-              <button type="submit" class="delete-button">Delete</button>
-    </form>
+                <button type="submit" class="delete-button">Delete</button>
+              </form>
+              {% else %}
+              <form
+                action="{{ url_for('admin_delete_book', book_id=book.book_id) }}"
+                method="POST"
+                style="display: inline"
+                onsubmit="
+                  return confirm(
+                    'Are you sure you want to permanently delete this book? This action cannot be undone.',
+                  );
+                "
+              >
+                <button type="submit" class="delete-button">Delete</button>
+              </form>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}
         </table>
 
         {% else %}
-        <p class="message">
-          No books found in the database.
-        </p>
+        <p class="message">No books found in the database.</p>
         {% endif %}
       </div>
     </div>
