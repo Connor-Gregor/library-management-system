@@ -224,9 +224,12 @@ def admin_delete_book(book_id):
 
     if session.get("role") != "admin":
         return redirect(url_for("user_dashboard"))
-
-    delete_book(book_id)
-    flash("Book deleted successfully.", "success")
+    
+    success, message = delete_book(book_id)
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
 
     return redirect(url_for("admin_view_books"))
 

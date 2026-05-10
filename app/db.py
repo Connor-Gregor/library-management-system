@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="YOUR MYSQL PASSWORD", #password for mysql database, change it to your own passowrd
+        password="Aadi02@noidayt", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -156,12 +156,24 @@ def get_all_borrowing_records():
 
 def get_all_books():
     query = """
-        SELECT book_id, title, author_first_name, author_last_name, publish_year
-        FROM book_collection
-        ORDER BY title
+        SELECT b.*, 
+               EXISTS(SELECT 1 FROM borrowing_history h WHERE h.book_id = b.book_id) as has_history
+        FROM book_collection b
     """
     return query_db(query)
 
 def delete_book(book_id):
-    query = "DELETE FROM book_collection WHERE book_id = %s"
-    return query_db(query, (book_id,))
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        query = "DELETE FROM book_collection WHERE book_id = %s"
+        cursor.execute(query, (book_id,))
+        conn.commit()
+        return True, "Book deleted successfully!"
+    except mysql.connector.errors.IntegrityError:
+        return False, "Cannot delete this book because it has active or past borrowing records. Please edit the book instead."
+    except Exception as e:
+        return False, f"An error occurred: {str(e)}"
+    finally:
+        cursor.close()
+        conn.close()
