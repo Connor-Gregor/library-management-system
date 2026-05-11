@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="MYSQL PASSWORD", #password for mysql database, change it to your own passowrd
+        password="Aadi02@noidayt", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -144,14 +144,28 @@ def get_user_borrowing_history(user_id):
     """
     return query_db(query, (user_id,))
 
-def get_all_borrowing_records():
+def get_all_borrowing_records(status_filter='all', sort_by='latest_borrow'):
     query = """
         SELECT h.borrow_id, p.username, b.title, h.borrow_date, h.due_date, h.return_date
         FROM borrowing_history h
         JOIN person p ON h.user_id = p.library_id
         JOIN book_collection b ON h.book_id = b.book_id
-        ORDER BY h.borrow_date DESC
     """
+    
+    if status_filter == 'active':
+        query += " WHERE h.return_date IS NULL"
+    elif status_filter == 'returned':
+        query += " WHERE h.return_date IS NOT NULL"
+        
+    if sort_by == 'earliest_due':
+        query += " ORDER BY h.due_date ASC"
+    elif sort_by == 'latest_due':
+        query += " ORDER BY h.due_date DESC"
+    elif sort_by == 'oldest_borrow':
+        query += " ORDER BY h.borrow_date ASC"
+    else:
+        query += " ORDER BY h.borrow_date DESC"
+
     return query_db(query)
 
 def get_all_books():
@@ -177,3 +191,24 @@ def delete_book(book_id):
     finally:
         cursor.close()
         conn.close()
+        
+def get_book_by_id(book_id):
+    query = "SELECT * FROM book_collection WHERE book_id = %s"
+    return query_db(query, (book_id,), fetchone=True)
+
+def update_book(book_id, title, author_first, author_last, p_year, p_month, genre, copies):
+    query = """
+        UPDATE book_collection
+        SET title = %s, author_first_name = %s, author_last_name = %s, 
+            publish_year = %s, publish_month = %s, genre = %s, copies_available = %s
+        WHERE book_id = %s
+    """
+    return query_db(query, (title, author_first, author_last, p_year, p_month, genre, copies, book_id))
+
+def get_all_users():
+    query = """
+        SELECT library_id, username, email, first_name, last_name, role 
+        FROM person 
+        ORDER BY role ASC, last_name ASC
+    """
+    return query_db(query)

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Edit Book</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-image: url('/static/images/Library_Background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+      }
+      .page-title {
+        color: white;
+        margin: 0 0 20px 0;
+        text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
+      }
+      .form-container {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 350px;
+        text-align: left;
+      }
+      h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+      }
+      label {
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.9rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 0.6rem;
+        background-color: #28a745;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1rem;
+      }
+      button:hover {
+        background-color: #218838;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.85rem;
+      }
+      .footer a {
+        color: #007bff;
+        text-decoration: none;
+      }
+      .error-message {
+        color: red;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <h1 class="page-title">Library Management System</h1>
+      <div class="form-container">
+        <h2>Edit Book</h2>
+
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+        <form method="POST">
+          <label>Title</label>
+          <input type="text" name="title" value="{{ book.title }}" required />
+
+          <label>Author First Name</label>
+          <input
+            type="text"
+            name="author_first_name"
+            value="{{ book.author_first_name }}"
+            required
+          />
+
+          <label>Author Last Name</label>
+          <input
+            type="text"
+            name="author_last_name"
+            value="{{ book.author_last_name }}"
+            required
+          />
+          <label>Publish Year</label>
+          <input
+            type="number"
+            name="publish_year"
+            value="{{ book.publish_year }}"
+            required
+          />
+          <label>Publish Month</label>
+          <input
+            type="number"
+            name="publish_month"
+            value="{{ book.publish_month }}"
+            min="1"
+            max="12"
+            required
+          />
+          <label>Genre</label>
+          <input type="text" name="genre" value="{{ book.genre }}" required />
+          <label>Number of Copies</label>
+          <input
+            type="number"
+            name="copies_available"
+            value="{{ book.copies_available }}"
+            min="0"
+            required
+          />
+
+          <button type="submit">Save Changes</button>
+        </form>
+        <div class="footer">
+          <p>
+            <a href="{{ url_for('admin_view_books') }}">Cancel and Go Back</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

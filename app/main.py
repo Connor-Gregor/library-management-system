@@ -3,7 +3,7 @@ from enum import nonmember
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from db import (get_user_by_username, create_user, search_books, get_book, create_book, borrow_book,
                 get_my_borrowed_books, return_book, get_user_borrowing_history, get_all_borrowing_records,
-                get_all_books, delete_book)
+                get_all_books, delete_book, get_book_by_id, update_book, get_all_users)
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
@@ -202,8 +202,13 @@ def admin_history():
         flash("Unauthorized access. Admins only.", "error")
         return redirect(url_for("login"))
 
-    records = get_all_borrowing_records()
-    return render_template("admin_history.html", records=records)
+    status_filter = request.args.get("status", "all")
+    sort_by = request.args.get("sort", "latest_borrow")
+    records = get_all_borrowing_records(status_filter, sort_by)
+    return render_template("admin_history.html", 
+                           records=records, 
+                           current_status=status_filter, 
+                           current_sort=sort_by)
 
 
 @app.route("/admin/view_books")
@@ -232,6 +237,61 @@ def admin_delete_book(book_id):
         flash(message, "error")
 
     return redirect(url_for("admin_view_books"))
+
+@app.route("/admin/edit_book/<int:book_id>", methods=["GET", "POST"])
+def admin_edit_book(book_id):
+    if "user_id" not in session or session.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    error = None
+    book = get_book_by_id(book_id)
+    if not book:
+        flash("Book not found.", "error")
+        return redirect(url_for("admin_view_books"))
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        a_first_name = request.form.get("author_first_name", "").strip()
+        a_last_name = request.form.get("author_last_name", "").strip()
+        genre = request.form.get("genre", "").strip()
+
+        if not title or not a_first_name or not a_last_name or not genre:
+            error = "Title, author name, and genre are required."
+            return render_template("edit_book.html", book=book, error=error)
+
+        try:
+            p_year = int(request.form.get("publish_year"))
+            p_month = int(request.form.get("publish_month"))
+            copies_available = int(request.form.get("copies_available"))
+        except ValueError:
+            error = "Publish year, month, and copies must be numbers."
+            return render_template("edit_book.html", book=book, error=error)
+
+        if p_month < 1 or p_month > 12:
+            error = "Month must be between 1 and 12."
+            return render_template("edit_book.html", book=book, error=error)
+        if p_year > 2026:
+            error = "Invalid publish year."
+            return render_template("edit_book.html", book=book, error=error)
+        if copies_available < 0:
+            error = "Copies cannot be negative."
+            return render_template("edit_book.html", book=book, error=error)
+
+        update_book(book_id, title, a_first_name, a_last_name, p_year, p_month, genre, copies_available)
+        flash("Book updated successfully!", "success")
+        return redirect(url_for("admin_view_books"))
+
+    return render_template("edit_book.html", book=book, error=error)
+
+@app.route("/admin/view_users")
+def admin_view_users():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    if session.get("role") != "admin":
+        return redirect(url_for("user_dashboard"))
+
+    users = get_all_users()
+    return render_template("admin_view_all_users.html", users=users)
 
 if __name__ == "__main__":
     app.run(debug=True)
