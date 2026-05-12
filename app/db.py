@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="Aadi02@noidayt", #password for mysql database, change it to your own passowrd
+        password="MY SQL PASSWORD", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -75,17 +75,14 @@ def borrow_book(user_id, book_id):
     try:
         cursor.execute("SELECT * FROM borrowing_history WHERE user_id = %s AND book_id = %s AND return_date IS NULL", (user_id, book_id))
         already_borrowed = cursor.fetchone()
-        
         if already_borrowed:
             return False, "You already have a copy of this book checked out!"
 
         cursor.execute("SELECT copies_available FROM book_collection WHERE book_id = %s", (book_id,))
         book = cursor.fetchone()
-        
         if not book or book['copies_available'] < 1:
             return False, "Sorry, there are no copies of this book left."
 
-        cursor.execute("UPDATE book_collection SET copies_available = copies_available - 1 WHERE book_id = %s", (book_id,))
         borrow_date = date.today()
         due_date = borrow_date + timedelta(days=30)
         insert_query = """
@@ -113,8 +110,6 @@ def return_book(user_id, book_id):
             WHERE user_id = %s AND book_id = %s AND return_date IS NULL
         """
         cursor.execute(update_history, (date.today(), user_id, book_id))
-        update_book = "UPDATE book_collection SET copies_available = copies_available + 1 WHERE book_id = %s"
-        cursor.execute(update_book, (book_id,))
         conn.commit()
         return True, "Book returned successfully! Thank you."
 
