@@ -76,7 +76,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 CREATE TRIGGER after_book_return
 AFTER UPDATE ON borrowing_history
@@ -89,3 +88,12 @@ BEGIN
     END IF;
 END //
 DELIMITER ;
+
+-- Entering test data
+INSERT INTO book_collection (title, author_first_name, author_last_name, publish_year, publish_month, genre, copies_available)
+VALUES 
+('The Great Gatsby', 'F. Scott', 'Fitzgerald', 1925, 4, 'Fiction', 3),
+('Dune', 'Frank', 'Herbert', 1965, 8, 'Sci-Fi', 5),
+('1984', 'George', 'Orwell', 1949, 6, 'Dystopian', 2),
+('The Hobbit', 'J.R.R.', 'Tolkien', 1937, 9, 'Fantasy', 4),
+('To Kill a Mockingbird', 'Harper', 'Lee', 1960, 7, 'Fiction', 1);
