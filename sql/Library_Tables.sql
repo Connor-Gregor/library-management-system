@@ -167,3 +167,6 @@ BEGIN
     CLOSE borrow_cursor;
 
 END //
+
+ALTER TABLE person MODIFY pword VARCHAR(255);
+

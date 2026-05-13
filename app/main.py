@@ -1,13 +1,16 @@
 from enum import nonmember
-
+import time
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from db import (get_user_by_username, create_user, search_books, get_book, create_book, borrow_book,
                 get_my_borrowed_books, return_book, get_user_borrowing_history, get_all_borrowing_records,
-                get_all_books, delete_book, get_book_by_id, update_book, get_all_users)
+                get_all_books, delete_book, get_book_by_id, update_book, get_all_users, get_user_by_id, delete_user_by_id,
+                update_user)
+from werkzeug.security import generate_password_hash, check_password_hash  
 
 app = Flask(__name__)
 app.secret_key = "simple-key"
 
+failed_login_tracker = {}
 
 @app.route("/")
 def home():
@@ -22,25 +25,50 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
+        if not username or not password:
+            error = "Please fill out all fields."
+            return render_template("login.html", error=error)
+
         user = get_user_by_username(username)
+        current_time = time.time()
+        tracker = failed_login_tracker.get(username, {"attempts": 0, "lock_until": 0})
+    
+        if tracker["lock_until"] > current_time:
+            error = "Too many failed attempts. Account locked for 1 minute."
+            return render_template("login.html", error=error)
 
         if user is None:
             error = "Invalid username or password."
-        elif not username or not password:
-            error = "Please fill out all fields."
-        elif user["pword"] != password:
-            error = "Invalid username or password."
+            return render_template("login.html", error=error)
+       
+        if "$" in user["pword"]:
+            password_is_correct = check_password_hash(user["pword"], password)
         else:
-            session["user_id"] = user["library_id"]
-            session["username"] = user["username"]
-            session["role"] = user["role"]
+            password_is_correct = (password == user["pword"])
+      
+        if not password_is_correct:
+            error = "Invalid username or password."
+            tracker["attempts"] += 1
+            if tracker["attempts"] > 4:
+                tracker["lock_until"] = current_time + 60
+                error = "Too many failed attempts. Account locked for 1 minute."
+            
+            failed_login_tracker[username] = tracker
+            return render_template("login.html", error=error)
+            
+        failed_login_tracker.pop(username, None)
 
-            if user["role"] == "admin":
-                return redirect(url_for("admin_dashboard"))
-            else:
-                return redirect(url_for("user_dashboard"))
+        session["user_id"] = user["library_id"]
+        session["username"] = user["username"]
+        session["role"] = user["role"]
+
+        if user["role"] == "admin":
+            return redirect(url_for("admin_dashboard"))
+        else:
+            return redirect(url_for("user_dashboard"))
 
     return render_template("login.html", error=error)
+    
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -61,11 +89,13 @@ def register():
         elif len(password) < 5:
             error = "Password must be at least 5 characters long."
         else:
-            create_user(username, password, email, first_name, last_name)
+            hashed_password = generate_password_hash(password)
+            create_user(username, hashed_password, email, first_name, last_name)
             flash("Registration successful!", "success")
             return redirect(url_for("login"))
 
     return render_template("register.html", error=error)
+
 
 @app.route("/admin")
 def admin_dashboard():
@@ -105,6 +135,7 @@ def user_books():
         books = search_books(search_term)
 
     return render_template("user_books.html", books=books, search_term=search_term)
+
 
 @app.route("/admin/new_book", methods=["GET", "POST"])
 def admin_add_book():
@@ -157,6 +188,7 @@ def admin_add_book():
 
     return render_template("add_book.html", error=error)
 
+
 @app.route("/borrow/<int:book_id>", methods=["POST"])
 def borrow(book_id):
     if "user_id" not in session:
@@ -170,6 +202,7 @@ def borrow(book_id):
         flash(message, "error")
 
     return redirect(url_for("user_books"))
+
 
 @app.route("/my_books")
 def my_books():
@@ -196,6 +229,7 @@ def return_book_route(book_id):
 
     return redirect(url_for("my_books"))
 
+
 @app.route("/admin/history")
 def admin_history():
     if session.get("role") != "admin":
@@ -205,94 +239,115 @@ def admin_history():
     status_filter = request.args.get("status", "all")
     sort_by = request.args.get("sort", "latest_borrow")
     records = get_all_borrowing_records(status_filter, sort_by)
-    return render_template("admin_history.html", 
-                           records=records, 
-                           current_status=status_filter, 
-                           current_sort=sort_by)
+    return render_template("admin_history.html", records=records)
 
 
 @app.route("/admin/view_books")
 def admin_view_books():
-    if "user_id" not in session:
+    if "user_id" not in session or session.get("role") != "admin":
         return redirect(url_for("login"))
-
-    if session.get("role") != "admin":
-        return redirect(url_for("user_dashboard"))
-
+    
     books = get_all_books()
     return render_template("admin_view_all_books.html", books=books)
 
-@app.route("/admin/delete_book/<int:book_id>", methods=["POST"])
-def admin_delete_book(book_id):
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    if session.get("role") != "admin":
-        return redirect(url_for("user_dashboard"))
-    
-    success, message = delete_book(book_id)
-    if success:
-        flash(message, "success")
-    else:
-        flash(message, "error")
-
-    return redirect(url_for("admin_view_books"))
 
 @app.route("/admin/edit_book/<int:book_id>", methods=["GET", "POST"])
 def admin_edit_book(book_id):
     if "user_id" not in session or session.get("role") != "admin":
         return redirect(url_for("login"))
-
+        
     error = None
     book = get_book_by_id(book_id)
-    if not book:
-        flash("Book not found.", "error")
-        return redirect(url_for("admin_view_books"))
-
+    
     if request.method == "POST":
-        title = request.form.get("title", "").strip()
-        a_first_name = request.form.get("author_first_name", "").strip()
-        a_last_name = request.form.get("author_last_name", "").strip()
-        genre = request.form.get("genre", "").strip()
-
-        if not title or not a_first_name or not a_last_name or not genre:
-            error = "Title, author name, and genre are required."
-            return render_template("edit_book.html", book=book, error=error)
-
-        try:
-            p_year = int(request.form.get("publish_year"))
-            p_month = int(request.form.get("publish_month"))
-            copies_available = int(request.form.get("copies_available"))
-        except ValueError:
-            error = "Publish year, month, and copies must be numbers."
-            return render_template("edit_book.html", book=book, error=error)
-
-        if p_month < 1 or p_month > 12:
-            error = "Month must be between 1 and 12."
-            return render_template("edit_book.html", book=book, error=error)
-        if p_year > 2026:
-            error = "Invalid publish year."
-            return render_template("edit_book.html", book=book, error=error)
-        if copies_available < 0:
-            error = "Copies cannot be negative."
-            return render_template("edit_book.html", book=book, error=error)
-
-        update_book(book_id, title, a_first_name, a_last_name, p_year, p_month, genre, copies_available)
+        title = request.form.get("title")
+        author_first = request.form.get("author_first_name")
+        author_last = request.form.get("author_last_name")
+        year = int(request.form.get("publish_year"))
+        month = int(request.form.get("publish_month"))
+        genre = request.form.get("genre")
+        copies = int(request.form.get("copies_available"))
+        
+        update_book(book_id, title, author_first, author_last, year, month, genre, copies)
         flash("Book updated successfully!", "success")
         return redirect(url_for("admin_view_books"))
-
+        
     return render_template("edit_book.html", book=book, error=error)
+
+
+@app.route("/admin/delete_book/<int:book_id>", methods=["POST"])
+def admin_delete_book(book_id):
+    if "user_id" not in session or session.get("role") != "admin":
+        return redirect(url_for("login"))
+        
+    delete_book(book_id)
+    flash("Book deleted successfully!", "success")
+    return redirect(url_for("admin_view_books"))
+
 
 @app.route("/admin/view_users")
 def admin_view_users():
-    if "user_id" not in session:
+    if "user_id" not in session or session.get("role") != "admin":
         return redirect(url_for("login"))
-    if session.get("role") != "admin":
-        return redirect(url_for("user_dashboard"))
-
+    
     users = get_all_users()
     return render_template("admin_view_all_users.html", users=users)
 
+
+@app.route("/admin/edit_user/<int:user_id>", methods=["GET", "POST"])
+def admin_edit_user(user_id):
+    if "user_id" not in session or session.get("role") != "admin":
+        return redirect(url_for("login"))
+        
+    error = None
+    user = get_user_by_id(user_id)
+    
+    if request.method == "POST":
+        username = request.form.get("username")
+        email = request.form.get("email")
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        address = request.form.get("address")
+        city = request.form.get("city")
+        zip_code = request.form.get("zip_code")
+        if not zip_code or zip_code.strip() == "":
+            zip_code = None
+        raw_zip = request.form.get("zip_code", "").strip()
+
+        if raw_zip and (not raw_zip.isdigit() or len(raw_zip) < 5):
+            return render_template("edit_user.html", user=user, error="Zip code must be at least 5 digits.")
+        zip_code = raw_zip if raw_zip else None
+        
+        role = request.form.get("role")
+        
+        try:
+            update_user(user_id, username, email, first_name, last_name, address, city, zip_code, role)
+            flash("User updated successfully!", "success")
+            return redirect(url_for("admin_view_users"))
+        except Exception as e:
+            error = f"Database error: Please check your input format. Detail: {str(e)}"
+        
+    return render_template("edit_user.html", user=user, error=error)
+
+
+@app.route("/admin/delete_user/<int:user_id>", methods=["POST"])
+def admin_delete_user(user_id):
+    if "user_id" not in session or session.get("role") != "admin":
+        return redirect(url_for("login"))
+
+    if user_id == session["user_id"]:
+        flash("You cannot delete your own account.", "error")
+        return redirect(url_for("admin_view_users"))
+
+    success, message = delete_user_by_id(user_id)
+
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
+
+    return redirect(url_for("admin_view_users"))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-

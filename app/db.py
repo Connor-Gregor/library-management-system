@@ -23,7 +23,7 @@ def get_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",
-        password="MY SQL PASSWORD", #password for mysql database, change it to your own passowrd
+        password="admin", #password for mysql database, change it to your own passowrd
         database="Library_Model" #database name for login information
     )
 
@@ -189,8 +189,44 @@ def update_book(book_id, title, author_first, author_last, p_year, p_month, genr
 
 def get_all_users():
     query = """
-        SELECT library_id, username, email, first_name, last_name, role 
+        SELECT library_id, username, email, first_name, last_name, role, address, city, zip_code
         FROM person 
         ORDER BY role ASC, last_name ASC
     """
     return query_db(query)
+
+def get_user_by_id(user_id):
+    query = "SELECT library_id, username, email, first_name, last_name, role, address, city, zip_code FROM person WHERE library_id = %s"
+    return query_db(query, (user_id,), fetchone=True)
+
+def update_user(user_id, username, email, first_name, last_name, address, city, zip_code, role):
+    query = """
+        UPDATE person
+        SET username = %s, 
+            email = %s, 
+            first_name = %s, 
+            last_name = %s, 
+            address = %s, 
+            city = %s, 
+            zip_code = %s, 
+            role = %s
+        WHERE library_id = %s
+    """
+    return query_db(query, (username, email, first_name, last_name, address, city, zip_code, role, user_id))
+
+def delete_user_by_id(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    try:
+        query = "DELETE FROM person WHERE library_id = %s"
+        cursor.execute(query, (user_id,))
+        conn.commit()
+        return True, "User deleted successfully!"
+    except mysql.connector.errors.IntegrityError:
+        return False, "Can't remove user because they have borrowing logs"
+    except Exception as e:
+        return False, f"An error occurred: {str(e)}"
+    finally:
+        cursor.close()
+        conn.close()
+
