@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Edit User</title>
+</head>
+<body>
+    <h2>Edit User Profile Details</h2>
+    {% if error %}
+        <div style="color: red; margin-bottom: 15px;">
+            <strong>Error:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="{{ url_for('admin_edit_user', user_id=user.library_id) }}" method="POST">
+        <p>
+            <label>First Name:</label><br>
+            <input type="text" name="first_name" value="{{ user.first_name }}" required>
+        </p>
+        <p>
+            <label>Last Name:</label><br>
+            <input type="text" name="last_name" value="{{ user.last_name }}" required>
+        </p>
+        <p>
+            <label>Username:</label><br>
+            <input type="text" name="username" value="{{ user.username }}" required>
+        </p>
+        <p>
+            <label>Email Address:</label><br>
+            <input type="email" name="email" value="{{ user.email }}" required>
+        </p>
+        <p>
+            <label>System Role Tier:</label><br>
+            <select name="role">
+                <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+            </select>
+        </p>
+        
+        <button type="submit">Save Changes</button>
+        <a href="{{ url_for('admin_view_users') }}">Cancel</a>
+    </form>
+</body>
+</html>
