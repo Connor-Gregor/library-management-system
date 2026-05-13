@@ -4,7 +4,7 @@ use Library_Model;
 create table person(
 	library_id int auto_increment primary key,
     username varchar(55),
-    pword varchar(55),
+    pword varchar(255),
     email varchar(55),
     first_name varchar(55),
     last_name varchar(55),
@@ -98,5 +98,74 @@ VALUES
 ('The Hobbit', 'J.R.R.', 'Tolkien', 1937, 9, 'Fantasy', 4),
 ('To Kill a Mockingbird', 'Harper', 'Lee', 1960, 7, 'Fiction', 1);
 
-ALTER TABLE person
-MODIFY COLUMN pword VARCHAR(255);
+-- Stored Procedure
+DELIMITER //
+
+CREATE PROCEDURE BorrowBook(
+    IN p_user_id INT,
+    IN p_book_id INT,
+    OUT p_success BOOLEAN,
+    OUT p_message VARCHAR(255)
+)
+BEGIN
+    DECLARE v_already_borrowed INT DEFAULT 0;
+    DECLARE v_copies INT DEFAULT 0;
+
+    SELECT COUNT(*) INTO v_already_borrowed
+    FROM borrowing_history
+    WHERE user_id = p_user_id AND book_id = p_book_id AND return_date IS NULL;
+    IF v_already_borrowed > 0 THEN
+        SET p_success = FALSE;
+        SET p_message = 'You already have a copy of this book checked out!';
+    ELSE
+        SELECT copies_available INTO v_copies
+        FROM book_collection
+        WHERE book_id = p_book_id;
+
+        IF v_copies < 1 THEN
+            SET p_success = FALSE;
+            SET p_message = 'Sorry, there are no copies of this book left.';
+        ELSE
+            INSERT INTO borrowing_history (user_id, book_id, borrow_date, due_date)
+            VALUES (p_user_id, p_book_id, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 30 DAY));
+
+            SET p_success = TRUE;
+            SET p_message = 'Book borrowed successfully! It is due in 30 days.';
+        END IF;
+    END IF;
+END //
+
+DELIMITER ;
+
+
+-- Cursor:
+DELIMITER //
+
+CREATE PROCEDURE AuditOverdueBooks(OUT overdue_count INT)
+BEGIN
+    DECLARE v_due_date DATE;
+    DECLARE v_done INT DEFAULT FALSE;
+    DECLARE borrow_cursor CURSOR FOR 
+        SELECT due_date 
+        FROM borrowing_history 
+        WHERE return_date IS NULL;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = TRUE;
+    SET overdue_count = 0;
+    OPEN borrow_cursor;
+
+    audit_loop: LOOP
+        FETCH borrow_cursor INTO v_due_date;
+        IF v_done THEN
+            LEAVE audit_loop;
+        END IF;
+
+        IF v_due_date < CURDATE() THEN
+            SET overdue_count = overdue_count + 1;
+        END IF;
+    END LOOP;
+    CLOSE borrow_cursor;
+
+END //
+
+ALTER TABLE person MODIFY pword VARCHAR(255);
