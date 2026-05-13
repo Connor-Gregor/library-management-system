@@ -334,13 +334,18 @@ def admin_edit_user(user_id):
 def admin_delete_user(user_id):
     if "user_id" not in session or session.get("role") != "admin":
         return redirect(url_for("login"))
-        
+
     if user_id == session["user_id"]:
-        flash("You cannot delete your own account.", "error") #Just in case
+        flash("You cannot delete your own account.", "error")
         return redirect(url_for("admin_view_users"))
-        
-    delete_user_by_id(user_id)
-    flash("User deleted successfully!", "success")
+
+    success, message = delete_user_by_id(user_id)
+
+    if success:
+        flash(message, "success")
+    else:
+        flash(message, "error")
+
     return redirect(url_for("admin_view_users"))
 
 

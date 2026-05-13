@@ -97,3 +97,6 @@ VALUES
 ('1984', 'George', 'Orwell', 1949, 6, 'Dystopian', 2),
 ('The Hobbit', 'J.R.R.', 'Tolkien', 1937, 9, 'Fantasy', 4),
 ('To Kill a Mockingbird', 'Harper', 'Lee', 1960, 7, 'Fiction', 1);
+
+ALTER TABLE person
+MODIFY COLUMN pword VARCHAR(255);
