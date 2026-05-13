@@ -4,7 +4,7 @@ use Library_Model;
 create table person(
 	library_id int auto_increment primary key,
     username varchar(55),
-    pword varchar(55),
+    pword varchar(255),
     email varchar(55),
     first_name varchar(55),
     last_name varchar(55),
