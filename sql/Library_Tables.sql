@@ -169,3 +169,4 @@ BEGIN
 END //
 
 ALTER TABLE person MODIFY pword VARCHAR(255);
+
