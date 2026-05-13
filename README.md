@@ -14,3 +14,5 @@ Group project for COMPSCI 557.
 - Connor Gregorius
 - Kou Moua
 - Cade Nersveen
+
+- How to run: Clone the repo onto your local machine and run main.py, then click the link that appears in the console / terminal
