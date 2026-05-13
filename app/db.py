@@ -70,28 +70,15 @@ def create_book(title, author_first_name, author_last_name, publish_year, publis
 
 def borrow_book(user_id, book_id):
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT * FROM borrowing_history WHERE user_id = %s AND book_id = %s AND return_date IS NULL", (user_id, book_id))
-        already_borrowed = cursor.fetchone()
-        if already_borrowed:
-            return False, "You already have a copy of this book checked out!"
-
-        cursor.execute("SELECT copies_available FROM book_collection WHERE book_id = %s", (book_id,))
-        book = cursor.fetchone()
-        if not book or book['copies_available'] < 1:
-            return False, "Sorry, there are no copies of this book left."
-
-        borrow_date = date.today()
-        due_date = borrow_date + timedelta(days=30)
-        insert_query = """
-            INSERT INTO borrowing_history (user_id, book_id, borrow_date, due_date)
-            VALUES (%s, %s, %s, %s)
-        """
-        cursor.execute(insert_query, (user_id, book_id, borrow_date, due_date))
+        result_args = cursor.callproc('BorrowBook', (user_id, book_id, 0, ''))
         conn.commit()
-        return True, "Book borrowed successfully! It is due in 30 days."
+        success = bool(result_args[2])
+        message = result_args[3]
+        
+        return success, message
 
     except Exception as e:
         conn.rollback()
